@@ -3,7 +3,7 @@
 Краткая инструкция по выкладке проекта на Vercel с базой Neon (PostgreSQL).
 
 ## 1. База данных (Neon)
-
+ 
 1. Зайдите на [neon.tech](https://neon.tech) и создайте проект.
 2. В настройках проекта скопируйте:
    - **Connection string** с опцией **Pooled connection** → это будет `DATABASE_URL`

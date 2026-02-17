@@ -7,6 +7,7 @@ import {
   calculateSessions,
   clipSessionsToRange,
   sumDurationMinutes,
+  type PresenceEventLike,
 } from "@/lib/presence-service";
 
 const LOOKBACK_MS = 24 * 60 * 60 * 1000;
@@ -62,7 +63,7 @@ export async function GET(
     select: { timestamp: true, status: true },
   });
 
-  const summarySessions = calculateSessions(summaryEvents, now, timeoutMinutes).sessions;
+  const summarySessions = calculateSessions(summaryEvents as PresenceEventLike[], now, timeoutMinutes).sessions;
   const todayClipped = clipSessionsToRange(summarySessions, todayStart, now);
   const weekClipped = clipSessionsToRange(summarySessions, weekStart, now);
   const monthClipped = clipSessionsToRange(summarySessions, monthStart, now);
@@ -85,7 +86,7 @@ export async function GET(
   );
 
   const { sessions, totalDurationMinutes } = calculateSessions(
-    eventsInRange,
+    eventsInRange as PresenceEventLike[],
     rangeEnd,
     timeoutMinutes
   );
@@ -97,7 +98,7 @@ export async function GET(
     const dayEvents = events.filter(
       (e) => e.timestamp >= new Date(d.getTime() - LOOKBACK_MS) && e.timestamp <= dayEnd
     );
-    const { sessions: daySessions } = calculateSessions(dayEvents, dayEnd, timeoutMinutes);
+    const { sessions: daySessions } = calculateSessions(dayEvents as PresenceEventLike[], dayEnd, timeoutMinutes);
     const clipped = clipSessionsToRange(daySessions, d, dayEnd);
     const dm = sumDurationMinutes(clipped);
     hoursPerDay.push({

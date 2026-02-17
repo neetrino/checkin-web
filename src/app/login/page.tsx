@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -90,5 +90,20 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-background to-muted/30">
+        <Card className="w-full max-w-sm">
+          <CardHeader><CardTitle>Sign in</CardTitle></CardHeader>
+          <CardContent><p className="text-muted-foreground">Loading…</p></CardContent>
+        </Card>
+      </main>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

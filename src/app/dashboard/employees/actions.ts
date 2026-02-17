@@ -4,10 +4,12 @@ import { redirect } from "next/navigation";
 import { startOfDay, startOfWeek, subDays } from "date-fns";
 import { prisma } from "@/lib/prisma";
 import { getSession, getSessionTimeoutMinutes } from "@/lib/auth";
+import type { PresenceStatus } from "@prisma/client";
 import {
   calculateSessions,
   clipSessionsToRange,
   sumDurationMinutes,
+  type PresenceEventLike,
 } from "@/lib/presence-service";
 
 const LOOKBACK_MS = 24 * 60 * 60 * 1000;
@@ -39,10 +41,10 @@ export async function getEmployees() {
     select: { userId: true, timestamp: true, status: true },
   });
 
-  const byUser = new Map<string, { timestamp: Date; status: string }[]>();
+  const byUser = new Map<string, PresenceEventLike[]>();
   for (const e of events) {
     if (!byUser.has(e.userId)) byUser.set(e.userId, []);
-    byUser.get(e.userId)!.push({ timestamp: e.timestamp, status: e.status });
+    byUser.get(e.userId)!.push({ timestamp: e.timestamp, status: e.status as PresenceStatus });
   }
 
   const employees = users.map((user) => {

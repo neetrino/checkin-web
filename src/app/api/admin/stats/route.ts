@@ -3,13 +3,17 @@ import { startOfDay, subDays, format } from "date-fns";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { getSessionTimeoutMinutes } from "@/lib/auth";
+import type { PresenceStatus } from "@prisma/client";
 import {
   calculateSessions,
   clipSessionsToRange,
   sumDurationMinutes,
+  type PresenceEventLike,
 } from "@/lib/presence-service";
 
 const LOOKBACK_MS = 24 * 60 * 60 * 1000;
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   try {
@@ -53,10 +57,10 @@ export async function GET(request: Request) {
     select: { userId: true, timestamp: true, status: true },
   });
 
-  const byUserToday = new Map<string, { timestamp: Date; status: string }[]>();
+  const byUserToday = new Map<string, PresenceEventLike[]>();
   for (const e of eventsForToday) {
     if (!byUserToday.has(e.userId)) byUserToday.set(e.userId, []);
-    byUserToday.get(e.userId)!.push({ timestamp: e.timestamp, status: e.status });
+    byUserToday.get(e.userId)!.push({ timestamp: e.timestamp, status: e.status as PresenceStatus });
   }
 
   let totalMinutesToday = 0;
@@ -85,10 +89,10 @@ export async function GET(request: Request) {
     select: { userId: true, timestamp: true, status: true },
   });
 
-  const byUserChart = new Map<string, { timestamp: Date; status: string }[]>();
+  const byUserChart = new Map<string, PresenceEventLike[]>();
   for (const e of allChartEvents) {
     if (!byUserChart.has(e.userId)) byUserChart.set(e.userId, []);
-    byUserChart.get(e.userId)!.push({ timestamp: e.timestamp, status: e.status });
+    byUserChart.get(e.userId)!.push({ timestamp: e.timestamp, status: e.status as PresenceStatus });
   }
 
   const hoursPerDay: { date: string; totalHours: number }[] = [];
